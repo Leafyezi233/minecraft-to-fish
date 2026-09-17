@@ -9,7 +9,7 @@
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-62b47a?style=flat-square)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.16.10-dbb69c?style=flat-square)](https://fabricmc.net/)
 [![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red?style=flat-square)](#-许可证)
-[![Version](https://img.shields.io/badge/Version-0.1.1--dev-orange?style=flat-square)](#)
+[![Version](https://img.shields.io/badge/Version-0.2.0--dev-orange?style=flat-square)](#)
 
 </div>
 
