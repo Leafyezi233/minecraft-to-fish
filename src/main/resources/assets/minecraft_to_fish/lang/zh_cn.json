@@ -4,5 +4,26 @@
   "item.minecraft_to_fish.aggressive_fish": "攻击性鱼",
   "item.minecraft_to_fish.brutal_fish": "凶猛的鱼",
   "entity.minecraft_to_fish.timid_fish": "微缩鱼",
-  "item.minecraft_to_fish.timid_fish": "微缩鱼"
+  "item.minecraft_to_fish.timid_fish": "微缩鱼",
+
+  "commands.minecraft_to_fish.fishvalue.query.result": "%s 的价值：%s（来源：%s）",
+  "commands.minecraft_to_fish.fishvalue.query.none": "%s 没有登记价值",
+  "commands.minecraft_to_fish.fishvalue.list.header": "价值表 第 %s/%s 页，共 %s 条：",
+  "commands.minecraft_to_fish.fishvalue.list.empty": "价值表为空，请检查数据包 fish_values/*.json",
+  "commands.minecraft_to_fish.fishvalue.set.done": "已将 %s 的价值设为 %s（原值：%s）",
+  "commands.minecraft_to_fish.fishvalue.set.hint": "提示：该覆盖只存在内存中，重启后失效；要持久化请写入数据包 fish_values/*.json",
+  "commands.minecraft_to_fish.fishvalue.reload.done": "已重载数据包价值表",
+  "commands.minecraft_to_fish.fishvalue.reload.failed": "重载失败：%s",
+  "commands.minecraft_to_fish.fishvalue.balance.result": "%s 的余额：%s",
+  "commands.minecraft_to_fish.fishvalue.give.done": "已给予 %s，%s 当前余额：%s",
+  "commands.minecraft_to_fish.fishvalue.give.failed": "加钱失败：%s",
+  "commands.minecraft_to_fish.fishvalue.sell.done": "已卖出 %s，获得 %s，当前余额：%s",
+  "commands.minecraft_to_fish.fishvalue.sell.empty_hand": "主手没有物品",
+  "commands.minecraft_to_fish.fishvalue.sell.no_value": "%s 没有登记价值，无法卖出",
+  "commands.minecraft_to_fish.fishvalue.sell.disabled": "卖鱼功能已在配置中关闭",
+  "commands.minecraft_to_fish.fishvalue.sell.failed": "卖出失败，请稍后重试",
+  "commands.minecraft_to_fish.fishvalue.error.player_only": "该命令只能由玩家执行",
+  "commands.minecraft_to_fish.fishvalue.bridge.info": "当前经济后端：%s；已注册：%s",
+  "commands.minecraft_to_fish.fishvalue.bridge.unknown": "未注册的经济后端：%s",
+  "commands.minecraft_to_fish.fishvalue.bridge.switched": "已切换经济后端，当前生效：%s"
 }

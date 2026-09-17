@@ -4,5 +4,26 @@
   "item.minecraft_to_fish.aggressive_fish": "Aggressive Fish",
   "item.minecraft_to_fish.brutal_fish": "Brutal Fish",
   "entity.minecraft_to_fish.timid_fish": "Shrunk Fish",
-  "item.minecraft_to_fish.timid_fish": "Shrunk Fish"
+  "item.minecraft_to_fish.timid_fish": "Shrunk Fish",
+
+  "commands.minecraft_to_fish.fishvalue.query.result": "Value of %s: %s (source: %s)",
+  "commands.minecraft_to_fish.fishvalue.query.none": "%s has no registered value",
+  "commands.minecraft_to_fish.fishvalue.list.header": "Value table page %s/%s, %s entries:",
+  "commands.minecraft_to_fish.fishvalue.list.empty": "Value table is empty — check your datapack fish_values/*.json",
+  "commands.minecraft_to_fish.fishvalue.set.done": "Set value of %s to %s (was: %s)",
+  "commands.minecraft_to_fish.fishvalue.set.hint": "Note: this override lives in memory only and is lost on restart; write it to a datapack fish_values/*.json to persist.",
+  "commands.minecraft_to_fish.fishvalue.reload.done": "Reloaded the datapack value table",
+  "commands.minecraft_to_fish.fishvalue.reload.failed": "Reload failed: %s",
+  "commands.minecraft_to_fish.fishvalue.balance.result": "%s's balance: %s",
+  "commands.minecraft_to_fish.fishvalue.give.done": "Gave %s to %s (balance: %s)",
+  "commands.minecraft_to_fish.fishvalue.give.failed": "Failed to deposit for %s",
+  "commands.minecraft_to_fish.fishvalue.sell.done": "Sold %s for %s (balance: %s)",
+  "commands.minecraft_to_fish.fishvalue.sell.empty_hand": "Your main hand is empty",
+  "commands.minecraft_to_fish.fishvalue.sell.no_value": "%s has no registered value and cannot be sold",
+  "commands.minecraft_to_fish.fishvalue.sell.disabled": "Selling is disabled in the config",
+  "commands.minecraft_to_fish.fishvalue.sell.failed": "Sale failed, please try again",
+  "commands.minecraft_to_fish.fishvalue.error.player_only": "This command can only be run by a player",
+  "commands.minecraft_to_fish.fishvalue.bridge.info": "Active economy backend: %s; registered: %s",
+  "commands.minecraft_to_fish.fishvalue.bridge.unknown": "Unknown economy backend: %s",
+  "commands.minecraft_to_fish.fishvalue.bridge.switched": "Economy backend switched, now active: %s"
 }

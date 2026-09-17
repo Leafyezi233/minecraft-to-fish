@@ -4,7 +4,7 @@
 
 **每一次抛竿，都会钓上来一个"东西"。**
 
-一个 Minecraft 1.20.1 Fabric 模组：钓鱼时**必定**召唤出一只自定义生物。
+一个 Minecraft 1.20.1 Fabric 模组：钓鱼时召唤出生物。
 
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-62b47a?style=flat-square)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.16.10-dbb69c?style=flat-square)](https://fabricmc.net/)
@@ -41,7 +41,98 @@
 
 - 贴图复用原版鳕鱼 / 鲑鱼 / 热带鱼
 - 位于创造模式 **「食物与饮品」** 标签页
-- 目前**不能吃、不能烹饪**（纯收藏/材料，欢迎提需求）
+- 目前**不能吃、不能烹饪**
+
+---
+
+## 💰 经济价值系统
+
+给物品登记"价值"，并提供一套可独立运行、也能对接外部经济模组的轻量经济系统。
+
+### 命令
+
+主命令 `/fishvalue`，别名 `/fv`。
+
+| 命令 | 权限 | 说明 |
+|---|:---:|---|
+| `/fv query <物品>` | 所有人 | 查询价值，并显示这个价是从哪来的 |
+| `/fv balance [玩家]` | 所有人 / OP | 查询余额 |
+| `/fv sell` | 所有人 | 卖掉**主手**的 1 个物品 |
+| `/fv list [页码]` | OP | 分页列出全部已登记价值 |
+| `/fv set <物品> <价值>` | OP | 临时改价（**只存内存，重启失效**） |
+| `/fv reload` | OP | 重载数据包价值表 |
+| `/fv give <玩家> <金额>` | OP | 加钱 |
+| `/fv bridge [后端]` | OP | 查看 / 切换经济后端 |
+
+> 💡 `/fv set` 是调试用的临时覆盖。要**持久化**改价，请写数据包（见下）。
+
+### 数据包改价
+
+在 `data/<命名空间>/fish_values/` 下新建任意 `.json`：
+
+```json
+{
+  "replace": false,
+  "values": {
+    "minecraft_to_fish:aggressive_fish": 45,
+    "minecraft:cod": 10
+  },
+  "tags": {
+    "#minecraft:fishes": 8,
+    "#c:iron_ingots": 25
+  }
+}
+```
+
+- `replace: true` → 应用本文件前**清空**已累积的价值表（整合包整体重定价用）
+- 多个文件按路径字典序依次应用，**后加载的覆盖先加载的**
+- 玩家数据包可覆盖模组内置的 `default.json`
+- 改完执行 `/fv reload` 即可生效，**无需重启**
+
+### 价值解析优先级
+
+```
+运行时覆盖 (/fv set)  >  精确物品价值  >  物品标签价值  >  兜底公式  >  无价值
+```
+
+- 标签价值在**多个标签同时命中**时取**最大值**，结果确定可预期
+- **兜底公式默认关闭**：只有登记过的物品才有价值，经济边界清晰。想让"万物有价"，把配置文件里的 `fallbackValueEnabled` 打开
+
+> ⚠️ **标签命名空间**：铁锭/金锭/钻石等请用 Fabric 约定标签 `#c:iron_ingots`，**不是** `#minecraft:iron_ingots`（后者不存在）。写错不会报错，但会静默失效 —— 模组会在启动日志里主动警告。
+
+### 配置文件
+
+首次启动生成 `config/minecraft_to_fish.json`：
+
+| 字段 | 默认 | 说明 |
+|---|---|---|
+| `currencyName` | `"渔币"` | 货币显示名 |
+| `preferredBridge` | `"internal"` | 首选经济后端 |
+| `useExternalEconomyIfPresent` | `false` | 是否自动探测外部经济模组 |
+| `externalCurrencyId` | `"common-economy:default"` | 外部 API 的货币 id |
+| `fallbackValueEnabled` | `false` | 是否给未登记物品兜底估值 |
+| `fallbackValue` | `0` | 兜底值；`0` = 按堆叠数推导（不可堆叠 16 / 可堆叠 4） |
+| `sellCommandEnabled` | `true` | 是否启用 `/fv sell` |
+| `showValueInTooltip` | `true` | 是否在 tooltip 显示价值（预留给后续版本） |
+| `debugLogging` | `false` | 打印逐条价值日志 |
+
+### 独立运行 & 外部经济 API
+
+**零依赖可运行**：内置钱包把余额存在存档里（主世界 `level.dat`），随存档备份/迁移，重启不丢。
+
+**对接外部经济**：本模组以**反射**方式适配 [Common Economy API](https://modrinth.com/mod/common-economy)，不引入编译期依赖、不新增 maven 仓库。
+
+- 装了就探测：把 `useExternalEconomyIfPresent` 设为 `true`
+- 探测失败 / API 版本不符 → **自动降级到内置钱包**并记 WARN，**绝不崩服**
+- 用 `/fv bridge` 查看当前生效的后端
+
+**给模组作者的接口**：在 `onInitialize()` 里注册自己的经济后端即可被本模组使用：
+
+```java
+EconomyBridgeRegistry.register(myBridge);   // 实现 EconomyBridge 接口
+```
+
+之后把 `preferredBridge` 设成你的 `id()`，或用 `/fv bridge <id>` 切换。
 
 ---
 
@@ -58,12 +149,10 @@
 
 ### 步骤
 
-1. 从 [Releases](../../releases) 下载 `minecraft_to_fish-<版本>.jar`
+1. 构建模组
 2. 丢进 `.minecraft/mods/` 文件夹
 3. **确认同时装了 Fabric API**（否则游戏会崩）
 4. 启动游戏
-
-> ⚠️ 本模组**只需装在客户端或服务端任一侧**即可正常运行逻辑；但若在服务器使用，建议两端都装以保持一致体验。
 
 ---
 
@@ -124,13 +213,20 @@ minecraft-to-fish/
 │  │  │  ├─ TimidFishEntity.java       微缩鱼（含飞行动画 + 逃跑 AI）
 │  │  │  └─ client/                    三个渲染器
 │  │  ├─ item/ModItems.java            物品注册
+│  │  ├─ economy/                      经济价值系统（可独立运行）
+│  │  │  ├─ ModEconomy.java            装配入口
+│  │  │  ├─ InternalEconomyState.java  内置钱包（存档持久化）
+│  │  │  ├─ value/                     价值表：加载 / 解析 / 兜底
+│  │  │  ├─ bridge/                    经济后端 SPI + 外部 API 反射适配
+│  │  │  ├─ command/                   /fishvalue 命令树
+│  │  │  └─ config/                    配置读写
 │  │  └─ mixin/
 │  │     └─ FishingBobberEntityMixin.java   钓鱼生成逻辑（核心）
 │  └─ resources/
 │     ├─ fabric.mod.json               模组元数据
 │     ├─ minecraft_to_fish.mixins.json Mixin 配置
 │     ├─ assets/minecraft_to_fish/     语言文件 + 物品模型
-│     └─ data/minecraft_to_fish/       战利品表
+│     └─ data/minecraft_to_fish/       战利品表 + 默认价值表
 ├─ gradle.properties                   所有版本号集中在此
 ├─ build.gradle                        依赖与构建配置
 └─ README.md                           本文档
@@ -165,6 +261,10 @@ private static final int WEIGHT_TIMID      = 30;  // 微缩鱼
 
 各实体类里的 `createXxxAttributes()`：`GENERIC_MAX_HEALTH` / `GENERIC_ATTACK_DAMAGE` / `GENERIC_FOLLOW_RANGE`。
 
+### 改物品价值
+
+不用改代码 —— 写数据包 `fish_values/*.json`，或临时用 `/fv set`。详见 [💰 经济价值系统](#-经济价值系统)。
+
 ---
 
 ## 🗺️ Roadmap
@@ -172,7 +272,10 @@ private static final int WEIGHT_TIMID      = 30;  // 微缩鱼
 - [ ] 鱼可以烤着吃 / 有食用效果
 - [ ] 自然生成（目前只能通过钓鱼获得）
 - [ ] 自定义贴图（现在是复用原版贴图）
-- [ ] 配置文件（免改代码调概率）
+- [ ] 图形化配置界面（目前是手改 `config/minecraft_to_fish.json`）
+- [ ] 物品价值 tooltip（客户端同步已预留）
+- [ ] 批量卖鱼 `/fv sellall` + 卖出确认
+- [ ] 配方自动估值（合成物 = 材料价值之和）
 
 ---
 
@@ -180,13 +283,6 @@ private static final int WEIGHT_TIMID      = 30;  // 微缩鱼
 
 欢迎提 [Issue](../../issues) 反馈问题！特别欢迎：**新生物的点子**、**平衡性建议**、**贴图**。
 
-> ⚠️ 由于本项目保留所有权利，**不接受代码 PR**。但你的想法和建议非常欢迎 —— 提 Issue 就行，如果我采纳了会自己实现。
-
-### ⚠️ 开发注意（给想自己改着玩的人）
-
-如果你 fork 本仓库**仅用于个人学习和本地游玩**，请注意这条坑：
-
-从 `src/main/resources/` **删除**文件后，务必执行 `clean build`。Gradle 的 `processResources` 只做增量复制，**不会删除**已移除的文件，旧文件会继续被打进 jar。
 
 ---
 

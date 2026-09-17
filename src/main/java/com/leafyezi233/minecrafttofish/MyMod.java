@@ -9,6 +9,7 @@ import com.leafyezi233.minecrafttofish.entity.AggressiveFishEntity;
 import com.leafyezi233.minecrafttofish.entity.BrutalFishEntity;
 import com.leafyezi233.minecrafttofish.entity.ModEntities;
 import com.leafyezi233.minecrafttofish.entity.TimidFishEntity;
+import com.leafyezi233.minecrafttofish.economy.ModEconomy;
 import com.leafyezi233.minecrafttofish.item.ModItems;
 
 /**
@@ -42,5 +43,8 @@ public class MyMod implements ModInitializer {
 		FabricDefaultAttributeRegistry.register(
 				ModEntities.TIMID_FISH,
 				TimidFishEntity.createTimidFishAttributes());
+
+		// 初始化物品经济价值系统（价值表 / 内置钱包 / /fishvalue 命令）
+		ModEconomy.init();
 	}
 }
