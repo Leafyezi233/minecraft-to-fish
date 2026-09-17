@@ -1,0 +1,29 @@
+package com.leafyezi233.minecrafttofish;
+
+import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.leafyezi233.minecrafttofish.entity.ModEntities;
+import com.leafyezi233.minecrafttofish.entity.client.AggressiveFishEntityRenderer;
+import com.leafyezi233.minecrafttofish.entity.client.BrutalFishEntityRenderer;
+import com.leafyezi233.minecrafttofish.entity.client.TimidFishEntityRenderer;
+
+/**
+ * 客户端专用入口（只会在单机或服务器客户端上执行）。
+ * 渲染、GUI、按键绑定、客户端物品栏等放这里。
+ */
+public class MyModClient implements ClientModInitializer {
+	public static final Logger LOGGER = LoggerFactory.getLogger(MyMod.MOD_ID + "-client");
+
+	@Override
+	public void onInitializeClient() {
+		LOGGER.info("Client side of {} is ready.", MyMod.MOD_ID);
+
+		// 注册实体的渲染器（客户端）
+		EntityRendererRegistry.register(ModEntities.AGGRESSIVE_FISH, AggressiveFishEntityRenderer::new);
+		EntityRendererRegistry.register(ModEntities.BRUTAL_FISH, BrutalFishEntityRenderer::new);
+		EntityRendererRegistry.register(ModEntities.TIMID_FISH, TimidFishEntityRenderer::new);
+	}
+}

@@ -1,0 +1,34 @@
+{
+	"schemaVersion": 1,
+	"id": "minecraft_to_fish",
+	"version": "${version}",
+	"name": "Minecraft to Fish",
+	"description": "Every catch spawns a creature. Fishing always summons one of three custom mobs — the Aggressive Fish, the Brutal Fish, or the tiny glowing Shrunk Fish — each with its own drop.",
+	"authors": [
+		"Leafyezi233"
+	],
+	"contact": {
+		"homepage": "https://github.com/Leafyezi233/minecraft-to-fish",
+		"sources": "https://github.com/Leafyezi233/minecraft-to-fish",
+		"issues": "https://github.com/Leafyezi233/minecraft-to-fish/issues"
+	},
+	"license": "All-Rights-Reserved",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.leafyezi233.minecrafttofish.MyMod"
+		],
+		"client": [
+			"com.leafyezi233.minecrafttofish.MyModClient"
+		]
+	},
+	"mixins": [
+		"minecraft_to_fish.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.15.0",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	}
+}
