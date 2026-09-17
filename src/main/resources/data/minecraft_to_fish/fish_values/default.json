@@ -15,19 +15,6 @@
 		"minecraft:string": 4,
 		"minecraft:rotten_flesh": 1,
 		"minecraft:ink_sac": 5,
-		"minecraft:nautilus_shell": 60,
-		"minecraft:heart_of_the_sea": 400
-	},
-	"tags": {
-		"#minecraft:fishes": 8,
-		"#minecraft:logs": 2,
-		"#minecraft:planks": 1,
-		"#minecraft:coals": 5,
-		"#c:iron_ingots": 25,
-		"#c:gold_ingots": 40,
-		"#c:diamonds": 200,
-		"#c:emeralds": 120,
-		"#c:copper_ingots": 12,
-		"#c:netherite_ingots": 900
+		"minecraft:nautilus_shell": 60
 	}
 }
