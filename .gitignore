@@ -1,0 +1,21 @@
+# Gradle
+.gradle/
+build/
+out/
+# IDE
+.idea/
+*.iml
+.vscode/
+# Eclipse
+.classpath
+.project
+.settings/
+bin/
+# macOS
+.DS_Store
+# runtime
+run/
+logs/
+# Fabric/Loom
+*.jar
+!gradle/wrapper/gradle-wrapper.jar

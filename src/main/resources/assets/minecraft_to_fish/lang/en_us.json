@@ -1,0 +1,8 @@
+{
+  "entity.minecraft_to_fish.aggressive_fish": "Aggressive Fish",
+  "entity.minecraft_to_fish.brutal_fish": "Brutal Fish",
+  "item.minecraft_to_fish.aggressive_fish": "Aggressive Fish",
+  "item.minecraft_to_fish.brutal_fish": "Brutal Fish",
+  "entity.minecraft_to_fish.timid_fish": "Shrunk Fish",
+  "item.minecraft_to_fish.timid_fish": "Shrunk Fish"
+}

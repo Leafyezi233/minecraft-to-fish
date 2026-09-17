@@ -1,0 +1,17 @@
+pluginManagement {
+	repositories {
+		maven {
+			name = 'Fabric'
+			url = 'https://maven.fabricmc.net/'
+		}
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}
+
+// 允许 Gradle 自动下载所需的 JDK（toolchain）版本。
+// 本项目的 MC 1.20.1 需要 Java 17，即使本机只装了 21，
+// 也会自动从 Adoptium 下载一个 JDK 17 到 ~/.gradle/jdks 使用。
+plugins {
+	id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
