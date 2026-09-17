@@ -4,6 +4,7 @@ import com.leafyezi233.minecrafttofish.MyMod;
 import com.leafyezi233.minecrafttofish.economy.bridge.EconomyBridges;
 import com.leafyezi233.minecrafttofish.economy.command.FishValueCommand;
 import com.leafyezi233.minecrafttofish.economy.config.EconomyConfig;
+import com.leafyezi233.minecrafttofish.economy.net.ValueTableSync;
 import com.leafyezi233.minecrafttofish.economy.value.ItemValueLoader;
 
 /**
@@ -19,6 +20,7 @@ import com.leafyezi233.minecrafttofish.economy.value.ItemValueLoader;
  *   <li>注册数据包价值表重载监听（开档/ {@code /reload} 时触发加载）</li>
  *   <li>初始化经济后端（内置钱包 + 外部桥探测）</li>
  *   <li>注册 {@code /fishvalue} 命令</li>
+ *   <li>注册价值表服务端同步（客户端 HUD 用）</li>
  * </ol>
  */
 public final class ModEconomy {
@@ -39,6 +41,7 @@ public final class ModEconomy {
 		ItemValueLoader.register();
 		EconomyBridges.init();
 		FishValueCommand.register();
+		ValueTableSync.register();
 
 		MyMod.LOGGER.info("[economy] 物品经济价值系统已就绪：后端={}，货币={}，兜底估值={}",
 				EconomyBridges.activeId(),

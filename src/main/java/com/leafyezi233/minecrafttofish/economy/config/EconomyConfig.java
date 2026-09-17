@@ -61,6 +61,12 @@ public final class EconomyConfig {
 	/** 是否在物品 tooltip 里显示价值（Phase 4 客户端同步使用） */
 	public boolean showValueInTooltip = true;
 
+	/**
+	 * 是否显示"手持模组鱼时的价值悬浮窗"（客户端）。
+	 * <p>关闭后 HUD 完全不渲染；价值表同步本身不受影响。
+	 */
+	public boolean showValueHud = true;
+
 	/** 是否启用 /fishvalue sell 卖鱼命令 */
 	public boolean sellCommandEnabled = true;
 

@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.leafyezi233.minecrafttofish.economy.client.EconomyHud;
 import com.leafyezi233.minecrafttofish.entity.ModEntities;
 import com.leafyezi233.minecrafttofish.entity.client.AggressiveFishEntityRenderer;
 import com.leafyezi233.minecrafttofish.entity.client.BrutalFishEntityRenderer;
@@ -25,5 +26,8 @@ public class MyModClient implements ClientModInitializer {
 		EntityRendererRegistry.register(ModEntities.AGGRESSIVE_FISH, AggressiveFishEntityRenderer::new);
 		EntityRendererRegistry.register(ModEntities.BRUTAL_FISH, BrutalFishEntityRenderer::new);
 		EntityRendererRegistry.register(ModEntities.TIMID_FISH, TimidFishEntityRenderer::new);
+
+		// 手持模组鱼时的价值悬浮窗（含服务端价值表同步的接收端）
+		EconomyHud.init();
 	}
 }

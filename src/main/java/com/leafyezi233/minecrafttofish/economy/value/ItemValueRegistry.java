@@ -188,6 +188,19 @@ public final class ItemValueRegistry {
 		return tagValues;
 	}
 
+	/**
+	 * 运行时覆盖表（只读），物品 id -&gt; 价值。
+	 * <p>用于价值表同步：网络快照需要把覆盖合并进精确物品价值，保证客户端 HUD
+	 * 与服务端 {@link #resolve(ItemStack)} 的结果一致。
+	 */
+	public static Map<Identifier, Long> runtimeOverrides() {
+		Map<Identifier, Long> snapshot = new LinkedHashMap<>();
+		for (Map.Entry<Item, Long> entry : RUNTIME_OVERRIDES.entrySet()) {
+			snapshot.put(Registries.ITEM.getId(entry.getKey()), entry.getValue());
+		}
+		return snapshot;
+	}
+
 	public static int loadedFileCount() {
 		return loadedFileCount;
 	}

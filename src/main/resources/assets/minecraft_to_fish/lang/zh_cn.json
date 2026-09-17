@@ -6,6 +6,8 @@
   "entity.minecraft_to_fish.timid_fish": "微缩鱼",
   "item.minecraft_to_fish.timid_fish": "微缩鱼",
 
+  "hud.minecraft_to_fish.no_value": "未登记价值",
+
   "commands.minecraft_to_fish.fishvalue.query.result": "%s 的价值：%s（来源：%s）",
   "commands.minecraft_to_fish.fishvalue.query.none": "%s 没有登记价值",
   "commands.minecraft_to_fish.fishvalue.list.header": "价值表 第 %s/%s 页，共 %s 条：",

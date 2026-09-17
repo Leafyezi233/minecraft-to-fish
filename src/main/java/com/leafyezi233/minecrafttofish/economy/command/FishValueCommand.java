@@ -15,6 +15,7 @@ import com.leafyezi233.minecrafttofish.MyMod;
 import com.leafyezi233.minecrafttofish.economy.bridge.EconomyBridgeRegistry;
 import com.leafyezi233.minecrafttofish.economy.bridge.EconomyBridges;
 import com.leafyezi233.minecrafttofish.economy.config.EconomyConfig;
+import com.leafyezi233.minecrafttofish.economy.net.ValueTableSync;
 import com.leafyezi233.minecrafttofish.economy.value.ItemValueRegistry;
 import com.leafyezi233.minecrafttofish.economy.value.ValueResult;
 
@@ -200,6 +201,9 @@ public final class FishValueCommand {
 
 		ctx.getSource().sendFeedback(() -> Text.translatable(
 				"commands.minecraft_to_fish.fishvalue.set.hint"), false);
+
+		// 改价后立刻把新价值表推给客户端，HUD 无需重连即可看到新价格
+		ValueTableSync.broadcast(ctx.getSource().getServer());
 		return 1;
 	}
 

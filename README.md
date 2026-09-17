@@ -116,8 +116,25 @@
 | `fallbackValueEnabled` | `false` | 是否给未登记物品兜底估值 |
 | `fallbackValue` | `0` | 兜底值；`0` = 按堆叠数推导（不可堆叠 16 / 可堆叠 4） |
 | `sellCommandEnabled` | `true` | 是否启用 `/fv sell` |
+| `showValueHud` | `true` | 是否显示手持鱼时的价值悬浮窗（客户端） |
 | `showValueInTooltip` | `true` | 是否在 tooltip 显示价值（预留给后续版本） |
 | `debugLogging` | `false` | 打印逐条价值日志 |
+
+### 价值悬浮窗（HUD）
+
+主手或副手拿着模组里的鱼时，屏幕**右侧正中**会显示这条鱼的名字和它的价值：
+
+```
+┌──────────────┐
+│ 攻击性鱼      │
+│ 25 渔币      │
+└──────────────┘
+```
+
+- 只认模组自己的三条鱼；主手优先，主手没有才看副手
+- 价格来自**服务端同步**，联机服务器上同样显示，且与服务端 `/fv query` 结果一致
+- 服务端改价（`/fv reload`、`/fv set`）后会立刻推给在线客户端，**无需重连**
+- 按 `F1` 隐藏 HUD 时一并隐藏；想彻底关掉就把 `showValueHud` 设为 `false`
 
 ### 独立运行 & 外部经济 API
 
@@ -221,6 +238,8 @@ minecraft-to-fish/
 │  │  │  ├─ InternalEconomyState.java  内置钱包（存档持久化）
 │  │  │  ├─ value/                     价值表：加载 / 解析 / 兜底
 │  │  │  ├─ bridge/                    经济后端 SPI + 外部 API 反射适配
+│  │  │  ├─ net/                       价值表服务端同步（客户端 HUD 用）
+│  │  │  ├─ client/                    HUD 悬浮窗 + 客户端价值表镜像
 │  │  │  ├─ command/                   /fishvalue 命令树
 │  │  │  └─ config/                    配置读写
 │  │  └─ mixin/
