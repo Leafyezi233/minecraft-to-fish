@@ -68,13 +68,13 @@
 
 ### 数据包改价
 
-在 `data/<命名空间>/fish_values/` 下新建任意 `.json`：
+在 `data/<命名空间>/fish_values/` 下新建任意 `.json`。下面是一个**示例**（展示格式，非模组内置值）：
 
 ```json
 {
   "replace": false,
   "values": {
-    "minecraft_to_fish:aggressive_fish": 45,
+    "minecraft_to_fish:aggressive_fish": 25,
     "minecraft:cod": 10
   },
   "tags": {
@@ -89,6 +89,8 @@
 - 改完执行 `/fv reload` 即可生效，**无需重启**
 
 > `tags` 段是可选的：用标签一次给一整类物品定价（如 `#minecraft:fishes` 覆盖所有鱼，包括其他模组加的鱼）。只想给具体物品定价就只写 `values`。
+
+**模组内置的 `default.json` 只给三条模组鱼定价**（攻击性鱼 25 / 凶猛的鱼 45 / 微缩鱼 60）。原版钓获物默认**没有价值** —— 想卖原版鱼和垃圾，自己写数据包加价即可。
 
 ### 价值解析优先级
 
