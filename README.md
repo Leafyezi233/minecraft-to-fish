@@ -9,7 +9,7 @@
 [![Minecraft](https://img.shields.io/badge/Minecraft-1.20.1-62b47a?style=flat-square)](https://www.minecraft.net/)
 [![Fabric](https://img.shields.io/badge/Fabric-0.16.10-dbb69c?style=flat-square)](https://fabricmc.net/)
 [![License](https://img.shields.io/badge/License-All%20Rights%20Reserved-red?style=flat-square)](#-许可证)
-[![Version](https://img.shields.io/badge/Version-0.2.0--dev-orange?style=flat-square)](#)
+[![Version](https://img.shields.io/badge/Version-0.3.0--dev-orange?style=flat-square)](#)
 
 </div>
 
@@ -95,9 +95,10 @@
 ### 价值解析优先级
 
 ```
-运行时覆盖 (/fv set)  >  精确物品价值  >  物品标签价值  >  兜底公式  >  无价值
+物品栈级覆盖（转盘加成）  >  运行时覆盖 (/fv set)  >  精确物品价值  >  物品标签价值  >  兜底公式  >  无价值
 ```
 
+- **物品栈级覆盖**由[渔轮转盘](#-渔轮转盘)写在鱼自己身上，只影响那一条鱼，优先级最高
 - 标签价值在**多个标签同时命中**时取**最大值**，结果确定可预期
 - **兜底公式默认关闭**：只有登记过的物品才有价值，经济边界清晰。想让"万物有价"，把配置文件里的 `fallbackValueEnabled` 打开
 
@@ -109,7 +110,7 @@
 
 | 字段 | 默认 | 说明 |
 |---|---|---|
-| `currencyName` | `"渔币"` | 货币显示名 |
+| `currencyName` | `"金币"` | 货币显示名 |
 | `preferredBridge` | `"internal"` | 首选经济后端 |
 | `useExternalEconomyIfPresent` | `false` | 是否自动探测外部经济模组 |
 | `externalCurrencyId` | `"common-economy:default"` | 外部 API 的货币 id |
@@ -127,7 +128,7 @@
 ```
 ┌──────────────┐
 │ 攻击性鱼      │
-│ 25 渔币      │
+│ 25 金币      │
 └──────────────┘
 ```
 
@@ -153,6 +154,83 @@ EconomyBridgeRegistry.register(myBridge);   // 实现 EconomyBridge 接口
 ```
 
 之后把 `preferredBridge` 设成你的 `id()`，或用 `/fv bridge <id>` 切换。
+
+---
+
+## 🎡 渔轮转盘
+
+一个**小游戏方块**：把鱼放进去，转一把，运气好价值翻倍，运气不好鱼就没了。
+
+### 获取方式
+
+**没有合成配方**，只能通过创造模式物品栏（**「功能方块」**标签页）或 `/give` 获得。
+
+```
+/give @s minecraft_to_fish:fish_wheel
+```
+
+### 玩法
+
+右键方块打开界面：左边一个槽位放鱼，右边一个转盘，下方「开始」按钮。
+
+| 扇区 | 概率 | 结果 |
+|---|:---:|---|
+| ×2 | 30% | 鱼的价值翻倍，**鱼留在槽里** |
+| ×5 | 5% | 鱼的价值 ×5，**鱼留在槽里** |
+| 未中奖 | 65% | **鱼消失**，没有任何返还 |
+
+中奖后鱼**留在槽位里**，可以接着转，也可以随时拿走。加成写在鱼自己身上，所以：
+
+- HUD 悬浮窗显示的是**加成后**的价值
+- `/fv sell` 按**加成后**的价值结算
+- 两条同种鱼各自的加成**互不影响**
+
+> ⚠️ 期望值 = (2×30 + 5×5 + 0×65) / 100 = **0.85**。长期玩下去价值必然衰减 —— 这是刻意设计的，转盘不是印钞机。
+
+### 提示
+
+按「开始」时，这几种情况会有提示且**不消耗鱼**：
+
+| 情况 | 提示 |
+|---|---|
+| 槽位是空的 | 请先放入一条鱼 |
+| 放的不是模组里的鱼 | 只能放入本模组的鱼 |
+| 这条鱼没有登记价值 | 这条鱼没有登记价值，无法参与转盘 |
+| 点太快 | 转盘还在转，请稍候 |
+
+槽位**不限制**放什么，钻石也能放进去 —— 但按「开始」时会报错。这样你随时能自己试出这条分支。
+
+### 物品安全
+
+**鱼不会丢。** 关闭界面、走远超过 8 格、方块被拆、玩家死亡、**甚至直接断线**，槽里的鱼都会回到背包（背包满了就掉在脚下）。
+
+### 配置
+
+`config/minecraft_to_fish.json` 里的转盘字段：
+
+| 字段 | 默认 | 说明 |
+|---|---|---|
+| `wheelEnabled` | `true` | 是否启用渔轮转盘方块 |
+| `wheelSectors` | ×2/×5/未中奖 | 扇区表，见下 |
+| `wheelSpinDurationMs` | `2000` | 转盘旋转动画时长（毫秒） |
+| `wheelSpinCooldownMs` | `500` | 两次抽奖的冷却（毫秒） |
+| `wheelMaxValue` | `0` | 单条鱼的价值上限；`0` = 不限制 |
+| `wheelRequireModFish` | `true` | 是否只允许放模组里的鱼 |
+
+扇区表长这样，**权重只有相对大小有意义**，扇区在盘面上占的角度按权重比例分配：
+
+```json
+"wheelSectors": [
+  { "multiplier": 2, "weight": 30, "color": -11555489, "labelKey": "x2" },
+  { "multiplier": 5, "weight": 5,  "color": -2840265,  "labelKey": "x5" },
+  { "multiplier": 0, "weight": 65, "color": -9748437,  "labelKey": "lose" }
+]
+```
+
+- `multiplier` = `0` 表示未中奖；想加 ×10 就往数组里加一条，**不用改代码**
+- `color` 是 ARGB 整数；写 `0` 会自动分配颜色
+- **期望值 ≥ 1 不会被拒绝** —— 你想配成对玩家有利的也行，只会在日志里打一条 WARN 提醒
+- 只有**结构上不可用**的配置才会回退到内置默认表（空列表、负倍率、权重全为 0）
 
 ---
 
@@ -242,6 +320,16 @@ minecraft-to-fish/
 │  │  │  ├─ client/                    HUD 悬浮窗 + 客户端价值表镜像
 │  │  │  ├─ command/                   /fishvalue 命令树
 │  │  │  └─ config/                    配置读写
+│  │  ├─ wheel/                        渔轮转盘（小游戏方块）
+│  │  │  ├─ ModBlocks.java             方块 + 界面类型注册
+│  │  │  ├─ FishWheelBlock.java        右键开界面
+│  │  │  ├─ FishWheelScreenHandler.java 权威逻辑：槽位 / 按钮 / 抽奖 / 交还
+│  │  │  ├─ FishWheelFactory.java      界面工厂（下发方块坐标）
+│  │  │  ├─ WheelTable.java            扇区表：权重归一化 / 角度分配 / 抽取
+│  │  │  ├─ WheelSector.java           扇区定义
+│  │  │  ├─ StackValueOverride.java    物品栈级价值覆盖（NBT）
+│  │  │  ├─ WheelSafety.java           断线 / 停服时强制交还物品
+│  │  │  └─ client/                    界面绘制 + 转盘动画
 │  │  └─ mixin/
 │  │     └─ FishingBobberEntityMixin.java   钓鱼生成逻辑（核心）
 │  └─ resources/
@@ -287,6 +375,10 @@ private static final int WEIGHT_TIMID      = 30;  // 微缩鱼
 
 不用改代码 —— 写数据包 `fish_values/*.json`，或临时用 `/fv set`。详见 [💰 经济价值系统](#-经济价值系统)。
 
+### 改转盘概率
+
+不用改代码 —— 改配置里的 `wheelSectors` 权重。详见 [🎡 渔轮转盘](#-渔轮转盘)。
+
 ---
 
 ## 🗺️ Roadmap
@@ -298,6 +390,7 @@ private static final int WEIGHT_TIMID      = 30;  // 微缩鱼
 - [ ] 物品价值 tooltip（客户端同步已预留）
 - [ ] 批量卖鱼 `/fv sellall` + 卖出确认
 - [ ] 配方自动估值（合成物 = 材料价值之和）
+- [ ] 渔轮转盘的自定义贴图（现在是复用原版金块贴图）
 
 ---
 

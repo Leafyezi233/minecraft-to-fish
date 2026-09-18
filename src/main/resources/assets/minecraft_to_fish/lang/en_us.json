@@ -8,6 +8,21 @@
 
   "hud.minecraft_to_fish.no_value": "No value registered",
 
+  "block.minecraft_to_fish.fish_wheel": "Fish Wheel",
+
+  "wheel.minecraft_to_fish.button.spin": "Spin",
+  "wheel.minecraft_to_fish.result.win": "×%s!",
+  "wheel.minecraft_to_fish.result.lose": "No win",
+  "wheel.minecraft_to_fish.disabled": "The fish wheel is disabled in the config",
+  "wheel.minecraft_to_fish.msg.empty": "Put a fish in the slot first",
+  "wheel.minecraft_to_fish.msg.not_mod_fish": "Only this mod's fish can be used",
+  "wheel.minecraft_to_fish.msg.no_value": "This fish has no registered value and cannot be spun",
+  "wheel.minecraft_to_fish.msg.cooldown": "The wheel is still spinning, please wait",
+  "wheel.minecraft_to_fish.value_bonus": "Wheel bonus",
+  "wheel.minecraft_to_fish.sector.x2": "×2",
+  "wheel.minecraft_to_fish.sector.x5": "×5",
+  "wheel.minecraft_to_fish.sector.lose": "No win",
+
   "commands.minecraft_to_fish.fishvalue.query.result": "Value of %s: %s (source: %s)",
   "commands.minecraft_to_fish.fishvalue.query.none": "%s has no registered value",
   "commands.minecraft_to_fish.fishvalue.list.header": "Value table page %s/%s, %s entries:",

@@ -6,6 +6,7 @@ import com.leafyezi233.minecrafttofish.economy.command.FishValueCommand;
 import com.leafyezi233.minecrafttofish.economy.config.EconomyConfig;
 import com.leafyezi233.minecrafttofish.economy.net.ValueTableSync;
 import com.leafyezi233.minecrafttofish.economy.value.ItemValueLoader;
+import com.leafyezi233.minecrafttofish.wheel.WheelTable;
 
 /**
  * 物品经济价值系统的唯一装配入口。
@@ -38,6 +39,7 @@ public final class ModEconomy {
 		initialized = true;
 
 		EconomyConfig.load();
+		WheelTable.rebuild();
 		ItemValueLoader.register();
 		EconomyBridges.init();
 		FishValueCommand.register();

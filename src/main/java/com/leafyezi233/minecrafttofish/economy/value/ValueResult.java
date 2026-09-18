@@ -16,7 +16,9 @@ public record ValueResult(long value, ValueSource source, Identifier matchedId) 
 
 	/** 价值来源，优先级从高到低 */
 	public enum ValueSource {
-		/** 运行时覆盖（/fishvalue set），优先级最高，重启失效 */
+		/** 物品栈级覆盖（转盘加成），写在物品自身 NBT 上，优先级最高 */
+		STACK,
+		/** 运行时覆盖（/fishvalue set），重启失效 */
 		RUNTIME,
 		/** 数据包里登记的精确物品价值 */
 		ITEM,
@@ -35,6 +37,7 @@ public record ValueResult(long value, ValueSource source, Identifier matchedId) 
 	/** 来源的可读描述，用于命令输出 */
 	public String sourceName() {
 		return switch (source) {
+			case STACK -> "stack";
 			case RUNTIME -> "runtime";
 			case ITEM -> "item";
 			case TAG -> "tag:" + matchedId;

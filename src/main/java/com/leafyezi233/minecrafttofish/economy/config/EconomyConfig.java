@@ -35,10 +35,15 @@ public final class EconomyConfig {
 	/** 配置文件路径，load() 时确定 */
 	private static volatile Path configPath;
 
+	// ---------------------------------------------------------------- 常量
+
+	/** 货币默认名称 */
+	public static final String DEFAULT_CURRENCY_NAME = "金币";
+
 	// ---------------------------------------------------------------- 配置项
 
 	/** 货币显示名称，用于命令反馈与 tooltip */
-	public String currencyName = "渔币";
+	public String currencyName = DEFAULT_CURRENCY_NAME;
 
 	/** 首选经济桥 id（"internal" = 内置钱包）。不可用时自动降级到 internal */
 	public String preferredBridge = "internal";
@@ -72,6 +77,43 @@ public final class EconomyConfig {
 
 	/** 是否输出调试日志 */
 	public boolean debugLogging = false;
+
+	// ------------------------------------------------------------ 渔轮转盘
+
+	/** 是否启用渔轮转盘方块 */
+	public boolean wheelEnabled = true;
+
+	/**
+	 * 转盘扇区表。<b>权重只有相对大小有意义</b>，扇区在盘面上占的角度按权重比例分配。
+	 * <p>默认：×2 = 30、×5 = 5、未中奖 = 65，期望倍率 0.85。
+	 * <p><b>期望值 &gt;= 1 不会回退</b> —— 想配成对玩家有利的也可以，只会打一条 WARN 日志。
+	 * 只有结构上不可用的配置才回退到内置默认表，见 {@code WheelTable}：
+	 * 空列表、负倍率、权重之和非正。
+	 */
+	public java.util.List<WheelSectorConfig> wheelSectors = defaultWheelSectors();
+
+	/** 转盘旋转动画时长（毫秒） */
+	public int wheelSpinDurationMs = 2000;
+
+	/** 两次抽奖之间的冷却（毫秒），防止连点刷屏 */
+	public int wheelSpinCooldownMs = 500;
+
+	/**
+	 * 单条鱼的价值上限；0 = 不限制。
+	 * <p>只用于防止极端幸运时数字爆炸。
+	 */
+	public long wheelMaxValue = 0L;
+
+	/** 是否只允许放入本模组的鱼（false = 任意物品都能放，按开始时才校验） */
+	public boolean wheelRequireModFish = true;
+
+	/** 内置默认扇区表：×2 = 30%、×5 = 5%、未中奖 = 65%，期望倍率 0.85 */
+	private static java.util.List<WheelSectorConfig> defaultWheelSectors() {
+		return new java.util.ArrayList<>(java.util.List.of(
+				new WheelSectorConfig(2, 30, 0xFF4FA3D1, "x2"),
+				new WheelSectorConfig(5, 5, 0xFFD4AF37, "x5"),
+				new WheelSectorConfig(0, 65, 0xFF6B6B6B, "lose")));
+	}
 
 	// ---------------------------------------------------------------- 读写
 
@@ -118,12 +160,12 @@ public final class EconomyConfig {
 	}
 
 	/**
-	 * 旧配置兼容钩子。
-	 * 目前没有历史版本需要迁移，留空占位；后续改字段名时在这里补默认值。
+	 * 配置兜底钩子：把缺失或非法的字段补成默认值。
+	 * <p>开发阶段不做前向兼容，字段改名/改默认值直接生效，不迁移旧值。
 	 */
 	private void migrate() {
 		if (currencyName == null || currencyName.isEmpty()) {
-			currencyName = "渔币";
+			currencyName = DEFAULT_CURRENCY_NAME;
 		}
 		if (preferredBridge == null || preferredBridge.isEmpty()) {
 			preferredBridge = "internal";
@@ -134,9 +176,24 @@ public final class EconomyConfig {
 		if (fallbackValue < 0L) {
 			fallbackValue = 0L;
 		}
+
+		// --- 渔轮转盘 ---
+		if (wheelSectors == null) {
+			// 老配置文件没有这个字段，或玩家手写成了 null
+			wheelSectors = defaultWheelSectors();
+		}
+		if (wheelSpinDurationMs < 0) {
+			wheelSpinDurationMs = 0;
+		}
+		if (wheelSpinCooldownMs < 0) {
+			wheelSpinCooldownMs = 0;
+		}
+		if (wheelMaxValue < 0L) {
+			wheelMaxValue = 0L;
+		}
 	}
 
-	/** 金额格式化："120 渔币" */
+	/** 金额格式化："120 金币" */
 	public String format(long amount) {
 		return amount + " " + currencyName;
 	}

@@ -6,6 +6,7 @@ import java.util.Map;
 import com.leafyezi233.minecrafttofish.MyMod;
 import com.leafyezi233.minecrafttofish.economy.config.EconomyConfig;
 import com.leafyezi233.minecrafttofish.economy.net.ValueTableSyncPayload;
+import com.leafyezi233.minecrafttofish.wheel.StackValueOverride;
 
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -28,7 +29,7 @@ import net.minecraft.util.Identifier;
  * 本类只服务于客户端显示，断线即清空。
  *
  * <h2>解析优先级</h2>
- * 与服务端保持一致：精确物品价值 &gt; 标签价值（多个命中取<b>最大</b>）&gt; 无价值。
+ * 与服务端保持一致：物品栈级覆盖 &gt; 精确物品价值 &gt; 标签价值（多个命中取<b>最大</b>）&gt; 无价值。
  * 兜底公式不参与同步 —— 它由客户端自己的配置决定，不属于服务端价值表的一部分。
  */
 @Environment(EnvType.CLIENT)
@@ -103,6 +104,13 @@ public final class ClientValueCache {
 			return 0L;
 		}
 
+		// 0) 物品栈级覆盖（转盘加成）—— 与 ItemValueRegistry 的优先级保持一致。
+		//    加成写在物品 NBT 上，客户端读得到，所以 HUD 显示的加成价不需要额外同步。
+		long stackOverride = StackValueOverride.read(stack);
+		if (stackOverride >= 0L) {
+			return stackOverride;
+		}
+
 		// 1) 精确物品价值
 		Long direct = items.get(Registries.ITEM.getId(stack.getItem()));
 		if (direct != null) {
@@ -124,7 +132,7 @@ public final class ClientValueCache {
 	}
 
 	/**
-	 * 金额格式化，例如 {@code "25 渔币"}。
+	 * 金额格式化，例如 {@code "25 金币"}。
 	 * <p>优先使用服务端同步过来的货币名；还没同步到时退回本地配置。
 	 */
 	public static String format(long amount) {

@@ -54,6 +54,6 @@ public interface EconomyBridge {
 	 */
 	boolean withdraw(ServerPlayerEntity player, long amount, String reason);
 
-	/** 把金额格式化成可读文本，例如 {@code "120 渔币"} */
+	/** 把金额格式化成可读文本，例如 {@code "120 金币"} */
 	String format(long amount);
 }

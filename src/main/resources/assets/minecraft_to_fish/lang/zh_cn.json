@@ -8,6 +8,21 @@
 
   "hud.minecraft_to_fish.no_value": "未登记价值",
 
+  "block.minecraft_to_fish.fish_wheel": "渔轮转盘",
+
+  "wheel.minecraft_to_fish.button.spin": "开始",
+  "wheel.minecraft_to_fish.result.win": "×%s！",
+  "wheel.minecraft_to_fish.result.lose": "未中奖",
+  "wheel.minecraft_to_fish.disabled": "渔轮转盘已在配置中关闭",
+  "wheel.minecraft_to_fish.msg.empty": "请先放入一条鱼",
+  "wheel.minecraft_to_fish.msg.not_mod_fish": "只能放入本模组的鱼",
+  "wheel.minecraft_to_fish.msg.no_value": "这条鱼没有登记价值，无法参与转盘",
+  "wheel.minecraft_to_fish.msg.cooldown": "转盘还在转，请稍候",
+  "wheel.minecraft_to_fish.value_bonus": "转盘加成",
+  "wheel.minecraft_to_fish.sector.x2": "×2",
+  "wheel.minecraft_to_fish.sector.x5": "×5",
+  "wheel.minecraft_to_fish.sector.lose": "未中奖",
+
   "commands.minecraft_to_fish.fishvalue.query.result": "%s 的价值：%s（来源：%s）",
   "commands.minecraft_to_fish.fishvalue.query.none": "%s 没有登记价值",
   "commands.minecraft_to_fish.fishvalue.list.header": "价值表 第 %s/%s 页，共 %s 条：",

@@ -10,6 +10,7 @@ import com.leafyezi233.minecrafttofish.entity.ModEntities;
 import com.leafyezi233.minecrafttofish.entity.client.AggressiveFishEntityRenderer;
 import com.leafyezi233.minecrafttofish.entity.client.BrutalFishEntityRenderer;
 import com.leafyezi233.minecrafttofish.entity.client.TimidFishEntityRenderer;
+import com.leafyezi233.minecrafttofish.wheel.client.WheelClient;
 
 /**
  * 客户端专用入口（只会在单机或服务器客户端上执行）。
@@ -29,5 +30,8 @@ public class MyModClient implements ClientModInitializer {
 
 		// 手持模组鱼时的价值悬浮窗（含服务端价值表同步的接收端）
 		EconomyHud.init();
+
+		// 渔轮转盘的客户端界面（面板 + 转盘绘制 + 旋转动画）
+		WheelClient.init();
 	}
 }

@@ -7,6 +7,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import com.leafyezi233.minecrafttofish.economy.config.EconomyConfig;
 import com.leafyezi233.minecrafttofish.economy.value.ValueResult.ValueSource;
+import com.leafyezi233.minecrafttofish.wheel.StackValueOverride;
 
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -20,6 +21,7 @@ import net.minecraft.util.Identifier;
  *
  * <h2>解析优先级（从高到低）</h2>
  * <ol>
+ *   <li><b>物品栈级覆盖</b> —— 写在物品自身 NBT 上（转盘加成），描述「这一个物品值多少」</li>
  *   <li>运行时覆盖 —— {@code /fishvalue set}，只存在内存里，重启失效</li>
  *   <li>精确物品价值 —— 数据包 {@code values} 段</li>
  *   <li>物品标签价值 —— 数据包 {@code tags} 段；多个标签同时命中时取<b>最大</b>值</li>
@@ -27,7 +29,11 @@ import net.minecraft.util.Identifier;
  *   <li>无价值（0）</li>
  * </ol>
  *
- * <p>所有解析结果按 {@link Item} 缓存（标签归属是物品级别的，缓存到物品是安全的），
+ * <p><b>注意第 1 项必须排在缓存之前</b>：{@link #CACHE} 按 {@link Item} 建键，
+ * 描述的是「这个物品类型值多少」；而栈级覆盖描述的是「这一个物品值多少」。
+ * 若把栈级覆盖放到缓存查询之后，两条带不同加成的同类鱼会互相污染。
+ *
+ * <p>标签归属是物品级别的，所以第 3~5 项的结果按 {@link Item} 缓存是安全的，
  * 数据包重载时整体清空。
  */
 public final class ItemValueRegistry {
@@ -64,6 +70,14 @@ public final class ItemValueRegistry {
 			return ValueResult.NONE;
 		}
 		Item item = stack.getItem();
+
+		// 0) 物品栈级覆盖（转盘加成）—— 必须放在最前面。
+		//    CACHE 是按 Item 建键的，同一个物品类型的不同加成值会互相污染，
+		//    所以这个判断绝不能挪到 CACHE.get(item) 之后。
+		long stackOverride = StackValueOverride.read(stack);
+		if (stackOverride >= 0L) {
+			return new ValueResult(stackOverride, ValueSource.STACK, Registries.ITEM.getId(item));
+		}
 
 		Long override = RUNTIME_OVERRIDES.get(item);
 		if (override != null) {
