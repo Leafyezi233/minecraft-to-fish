@@ -76,8 +76,21 @@ public final class WheelTable {
 
 	// ---------------------------------------------------------------- 当前实例
 
-	/** 当前生效的扇区表，由 {@link #rebuild()} 构建 */
+	/** 本地按配置构建的扇区表（<b>服务端权威</b>；客户端在没收到同步前也用它兜底） */
 	private static volatile WheelTable cachedTable;
+
+	/**
+	 * 服务端下发的扇区表（<b>仅客户端</b>，收到同步包后设置）。
+	 *
+	 * <p><b>为什么需要它</b>：扇区表来自服务端的配置文件，联机时客户端本地没有。
+	 * 若客户端拿自己的配置去画盘面，而服主改过扇区表，就会出现
+	 * 「服务端抽中第 3 个扇区、客户端盘面上那个位置画的是别的颜色」——
+	 * 更糟的是落点：客户端按自己的表算角度，指针会停在完全无关的格子上。
+	 * 所以只要收到过服务端的表，就一律以它为准。
+	 *
+	 * <p>为 null 表示「没收到过」（单机、或还没同步完），此时退回本地配置构建的表。
+	 */
+	private static volatile WheelTable remoteTable;
 
 	/**
 	 * 按当前配置重建扇区表，并缓存。
@@ -88,8 +101,39 @@ public final class WheelTable {
 		cachedTable = build(EconomyConfig.get().wheelSectors);
 	}
 
+	/**
+	 * 采用服务端下发的扇区表（<b>仅客户端调用</b>）。
+	 * <p>校验与回退规则和本地配置一致；服务端发来一张坏表时退回本地表，
+	 * 而不是让客户端崩在渲染线程上。
+	 */
+	public static void applyRemote(List<WheelSector> sectors) {
+		WheelTable table = fromSectors(sectors);
+		// fromSectors 校验失败时会退回「内置默认表」（usingDefaults=true）。
+		// 这种情况不能把它当成服务端的表记下来，否则有两个坏处：
+		// 一是 usingRemote() 会说谎（明明没用服务端的表却报 true），
+		// 二是它会把本地配置表整个盖掉。
+		// 所以判定为坏表时直接清空，让 current() 回到本地配置，与上面注释一致。
+		remoteTable = table.usingDefaults() ? null : table;
+	}
+
+	/** 丢弃服务端下发的表（断线时调用），之后重新以本地配置为准 */
+	public static void clearRemote() {
+		remoteTable = null;
+	}
+
+	/** 是否正在使用服务端下发的扇区表 */
+	public static boolean usingRemote() {
+		return remoteTable != null;
+	}
+
 	/** 当前生效的扇区表；尚未构建过时按当前配置惰性构建一次 */
 	public static WheelTable current() {
+		// 服务端下发的表优先：联机时它才是权威，本地配置可能与服主不一致
+		WheelTable remote = remoteTable;
+		if (remote != null) {
+			return remote;
+		}
+
 		WheelTable table = cachedTable;
 		if (table == null) {
 			synchronized (WheelTable.class) {
@@ -180,6 +224,51 @@ public final class WheelTable {
 		MyMod.LOGGER.info("[wheel] 已加载扇区表：{} 个扇区，期望值 {}",
 				sanitized.size(), String.format("%.4f", expected));
 		return new WheelTable(List.copyOf(sanitized), angles, (int) weightSum, expected, false);
+	}
+
+	/**
+	 * 由<b>已经校验过的扇区</b>直接构建表（网络同步路径用）。
+	 *
+	 * <p>与 {@link #build} 的区别：{@code build} 面向「玩家手写的配置」，
+	 * 允许 null 字段、0 颜色、越界权重，负责清理；
+	 * 本方法面向「服务端已经清理过一遍的表」，只需重算角度，
+	 * 且<b>不重复打日志</b>（否则每个客户端都会再刷一遍扇区表日志）。
+	 *
+	 * <p>仍然做最小校验：服务端与本模组版本不一致时，收到的可能是坏数据，
+	 * 此时退回内置默认表，绝不让客户端崩在渲染线程上。
+	 *
+	 * @param sectors 扇区列表，可为 null
+	 */
+	public static WheelTable fromSectors(List<WheelSector> sectors) {
+		if (sectors == null || sectors.isEmpty()) {
+			return fallback("同步来的扇区表为空");
+		}
+
+		List<WheelSector> sanitized = new ArrayList<>(Math.min(sectors.size(), MAX_SECTORS));
+		for (WheelSector sector : sectors) {
+			if (sector == null || sector.weight() <= 0) {
+				continue;
+			}
+			if (sanitized.size() >= MAX_SECTORS) {
+				break;
+			}
+			sanitized.add(sector);
+		}
+		if (sanitized.isEmpty()) {
+			return fallback("同步来的扇区表没有有效条目");
+		}
+
+		long weightSum = 0L;
+		for (WheelSector sector : sanitized) {
+			weightSum += sector.weight();
+		}
+		if (weightSum <= 0L) {
+			return fallback("同步来的扇区权重之和为 0");
+		}
+
+		float[] angles = allocateAngles(sanitized, weightSum);
+		return new WheelTable(List.copyOf(sanitized), angles, (int) weightSum,
+				expectedOf(sanitized, weightSum), false);
 	}
 
 	/** 回退到内置默认表，并打 ERROR 日志说明原因 */
@@ -280,21 +369,31 @@ public final class WheelTable {
 	// ---------------------------------------------------------------- 抽取
 
 	/**
-	 * 按权重抽一个扇区（<b>服务端权威</b>）。
+	 * 按权重抽一个扇区，返回<b>下标</b>（<b>服务端权威</b>）。
 	 * <p>用累计权重法：{@code nextInt(total)} 落在哪个区间就取哪个扇区，
 	 * 一次随机数调用完成，无浮点误差。
+	 *
+	 * <p><b>为什么对外传下标而不是扇区/倍率</b>：配置允许两个扇区倍率相同。
+	 * 若把倍率同步出去让客户端反查，两端只会命中第一个匹配项，
+	 * 于是「服务端抽中的是第 3 个 ×2，客户端指针却停在 0 号 ×2」。
+	 * 下标没有歧义，是让所有观看者看到同一个落点的前提。
 	 */
-	public WheelSector roll(Random random) {
+	public int rollIndex(Random random) {
 		int target = random.nextInt(totalWeight);
 		int cursor = 0;
-		for (WheelSector sector : sectors) {
-			cursor += sector.weight();
+		for (int i = 0; i < sectors.size(); i++) {
+			cursor += sectors.get(i).weight();
 			if (target < cursor) {
-				return sector;
+				return i;
 			}
 		}
 		// 理论上不可达（target < totalWeight）；真到了这里说明表被改坏了，取最后一项兜底
-		return sectors.get(sectors.size() - 1);
+		return sectors.size() - 1;
+	}
+
+	/** 按权重抽一个扇区（{@link #rollIndex} 的便捷包装） */
+	public WheelSector roll(Random random) {
+		return sectors.get(rollIndex(random));
 	}
 
 	// ---------------------------------------------------------------- 计算

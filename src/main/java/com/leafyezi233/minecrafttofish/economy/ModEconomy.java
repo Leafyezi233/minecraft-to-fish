@@ -6,7 +6,9 @@ import com.leafyezi233.minecrafttofish.economy.command.FishValueCommand;
 import com.leafyezi233.minecrafttofish.economy.config.EconomyConfig;
 import com.leafyezi233.minecrafttofish.economy.net.ValueTableSync;
 import com.leafyezi233.minecrafttofish.economy.value.ItemValueLoader;
+import com.leafyezi233.minecrafttofish.galton.GaltonBoard;
 import com.leafyezi233.minecrafttofish.wheel.WheelTable;
+import com.leafyezi233.minecrafttofish.wheel.net.WheelTableSync;
 
 /**
  * 物品经济价值系统的唯一装配入口。
@@ -40,10 +42,18 @@ public final class ModEconomy {
 
 		EconomyConfig.load();
 		WheelTable.rebuild();
+		// 高尔顿板槽位表同样在配置加载后构建一次：非法配置在这里就打出日志并回退，
+		// 不会等到玩家按下开始才发现问题
+		GaltonBoard.rebuild();
 		ItemValueLoader.register();
 		EconomyBridges.init();
 		FishValueCommand.register();
 		ValueTableSync.register();
+		// 转盘扇区表也要同步给客户端：客户端没有它就画不出正确的盘面
+		WheelTableSync.register();
+
+		// 高尔顿板槽位表同步（客户端要知道服务端配了多少排钉子、每格什么倍率）
+		com.leafyezi233.minecrafttofish.galton.net.GaltonTableSync.register();
 
 		MyMod.LOGGER.info("[economy] 物品经济价值系统已就绪：后端={}，货币={}，兜底估值={}",
 				EconomyBridges.activeId(),

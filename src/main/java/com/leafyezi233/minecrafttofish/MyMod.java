@@ -11,8 +11,8 @@ import com.leafyezi233.minecrafttofish.entity.ModEntities;
 import com.leafyezi233.minecrafttofish.entity.TimidFishEntity;
 import com.leafyezi233.minecrafttofish.economy.ModEconomy;
 import com.leafyezi233.minecrafttofish.item.ModItems;
+import com.leafyezi233.minecrafttofish.galton.GaltonBlocks;
 import com.leafyezi233.minecrafttofish.wheel.ModBlocks;
-import com.leafyezi233.minecrafttofish.wheel.WheelSafety;
 
 /**
  * 模组主入口（通用端：客户端和服务端都会执行）。
@@ -49,8 +49,10 @@ public class MyMod implements ModInitializer {
 		// 初始化物品经济价值系统（价值表 / 内置钱包 / /fishvalue 命令）
 		ModEconomy.init();
 
-		// 注册渔轮转盘方块 + 界面类型 + 物品安全网
+		// 注册渔轮转盘方块 + 方块实体
 		ModBlocks.register();
-		WheelSafety.register();
+
+		// 注册高尔顿板方块 + 方块实体
+		GaltonBlocks.register();
 	}
 }

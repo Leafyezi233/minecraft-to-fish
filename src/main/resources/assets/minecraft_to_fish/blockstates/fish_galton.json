@@ -1,0 +1,5 @@
+{
+  "variants": {
+    "": { "model": "minecraft_to_fish:block/fish_galton" }
+  }
+}
